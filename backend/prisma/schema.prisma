@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String    @id
+  name            String
+  username        String
+  displayUsername String
+  email           String
+  emailVerified   Boolean
+  image           String?
+  description     String?
+  location        String?
+  lastLogin       DateTime?
+  sportInterests  Sport[]   @default([])
+  createdAt       DateTime
+  updatedAt       DateTime
+
+  //joinRequest JoinRequest[]
+  //groupJoined Member[]
+  sessions Session[]
+  accounts Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+/**
+ * model Group {
+ * id             String   @id @default(cuid())
+ * name           String
+ * normalizedName String   @unique
+ * location       String?
+ * code           String?
+ * image          String?
+ * createdAt      DateTime @default(now())
+ * joinMode       JoinMode @default(PUBLIC)
+ * joinRequest    JoinRequest[]
+ * sportPracticed Sport[]
+ * members        Member[]
+ * }
+ * model JoinRequest {
+ * id      String @id @default(cuid())
+ * groupId String
+ * userId  String
+ * group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+ * user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+ * }
+ * model Member {
+ * id      String     @id @default(cuid())
+ * userId  String
+ * groupId String
+ * role    MemberRole @default(MEMBER)
+ * group   Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+ * user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+ * @@unique([groupId, userId])
+ * }
+ * enum MemberRole {
+ * ADMIN
+ * MEMBER
+ * MODERATOR
+ * }
+ * enum JoinMode {
+ * PRIVATE
+ * PUBLIC
+ * INVITATION
+ * }
+ */
+
+enum Sport {
+  ROAD_CYCLING
+  ROAD_MOUNTAIN
+  RUNNING
+  TRAIL
+}
