@@ -1,0 +1,10 @@
+services:
+  backend:
+    build:
+      context: './backend'
+      dockerfile: 'Dockerfile.dev'
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./backend:/app
+      - /home/node/node_modules
