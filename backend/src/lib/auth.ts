@@ -1,4 +1,4 @@
-import { betterAuth } from 'better-auth';
+import { APIError, betterAuth } from 'better-auth';
 import { username } from 'better-auth/plugins';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { comparePassword, hashPassword } from './bcrypt';
@@ -7,13 +7,17 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
 } from './mail';
+import { FRONTEND_URL } from './env-config';
+import { IUser } from '../types/user-types';
 
 export const auth = betterAuth({
+  trustedOrigins: [FRONTEND_URL],
   emailAndPassword: {
     autoSignIn: false,
     enabled: true,
     requireEmailVerification: true,
     resetPasswordTokenExpiresIn: 10 * 60, //10 min
+    revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, token }): Promise<void> => {
       await sendPasswordResetEmail({
         token,
@@ -46,16 +50,17 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     //envoyer l'email de verification pour activer le compte
     expiresIn: 15 * 60,
+
     sendVerificationEmail: async ({
       user,
       token,
     }: {
       token: string;
-      user: {
-        email: string;
-        username: string;
-      };
+      user: IUser;
     }): Promise<void> => {
+      //si l utilisateur a déjà verifié l email ne pas envoyer de confirmation
+      if (user.emailVerified) return;
+
       await sendEmailVerification({
         token,
         email: user.email,

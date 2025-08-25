@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { RESEND_KEY, FRONTENDURL } from './env-config';
+import { RESEND_KEY, FRONTEND_URL } from './env-config';
 
 const resend = new Resend(RESEND_KEY);
 
@@ -12,7 +12,7 @@ export const sendEmailVerification = async ({
   token: string;
   username: string;
 }) => {
-  const url = `${FRONTENDURL}/authentification/confirmation?token=${token}`;
+  const url = `${FRONTEND_URL}/authentification/confirmation?token=${token}`;
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px;">
@@ -59,7 +59,7 @@ export const sendPasswordResetEmail = async ({
   token: string;
   username: string;
 }) => {
-  const url = `${FRONTENDURL}/authentification/nouveau-mot-de-passe?token=${token}`;
+  const url = `${FRONTEND_URL}/authentification/nouveau-mot-de-passe?token=${token}`;
 
   const { error } = await resend.emails.send({
     from: 'Sport group <onboarding@resend.dev>',
