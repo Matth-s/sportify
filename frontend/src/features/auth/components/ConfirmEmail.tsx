@@ -11,8 +11,10 @@ import {
 } from "@/components/ui/card";
 import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
-import FormErrorMessage from "@/components/FormErrorMessage";
 import { toast } from "sonner";
+import { AuthRes } from "../types/res-auth-types";
+
+import FormErrorMessage from "@/components/FormErrorMessage";
 import FormEmailDialog from "./FormEmailDialog";
 
 type ConfirmEmailProps = {
@@ -26,11 +28,12 @@ const ConfirmEmail = ({ token }: ConfirmEmailProps) => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [errorContent, setErrorContent] = useState<React.ReactNode>(null);
 
-  const verifyEmail = async () => {
+  const verifyEmail = async (): Promise<void> => {
     try {
-      const res = await confirmEmailAction(token);
+      const res: AuthRes = await confirmEmailAction(token);
 
       if (res?.error) {
+        //afficher le composant pour recevoir une nouvelle confirmation si le token a expiré
         if (res.error === "Le token a expiré") {
           setErrorContent(
             <FormEmailDialog

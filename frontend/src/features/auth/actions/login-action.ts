@@ -1,8 +1,9 @@
 import { authClient } from "@/lib/auth-client";
 import { loginType } from "../schemas/login-schema";
 import { formatAuthError } from "@/helpers/format-auth-error";
+import { AuthRes } from "../types/res-auth-types";
 
-export const loginAction = async (credentials: loginType) => {
+export const loginAction = async (credentials: loginType): Promise<AuthRes> => {
   const { identifier, password } = credentials;
 
   let errorCode;

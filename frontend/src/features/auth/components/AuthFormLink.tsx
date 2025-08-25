@@ -9,9 +9,11 @@ type AuthFormLinkProps = {
 
 const AuthFormLink = ({ text, textLink, path }: AuthFormLinkProps) => {
   return (
-    <div className="mx-auto flex w-fit gap-x-1">
+    <div className="mx-auto flex w-fit gap-x-1 text-xs">
       <p>{text}</p>
-      <Link href={path}>{textLink}</Link>
+      <Link href={path} className="font-semibold hover:underline">
+        {textLink}
+      </Link>
     </div>
   );
 };

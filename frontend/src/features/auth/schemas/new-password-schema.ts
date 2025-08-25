@@ -3,8 +3,8 @@ import z from "zod";
 export const newPasswordSchema = z
   .object({
     token: z.string(),
-    password: z.string().min(1, {
-      error: "Mot de passe requis",
+    password: z.string().min(8, {
+      error: "Le mot de passe doit avoir une longueur de 8 minimum",
     }),
     confirmPassword: z.string(),
   })

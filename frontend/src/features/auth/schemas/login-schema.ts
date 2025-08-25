@@ -15,7 +15,7 @@ export const loginSchema = z.object({
         message: "Email invalide",
       },
     ),
-  password: z.string().min(6, "Mot de passe requis"),
+  password: z.string().min(1, "Mot de passe requis"),
 });
 
 export type loginType = z.infer<typeof loginSchema>;

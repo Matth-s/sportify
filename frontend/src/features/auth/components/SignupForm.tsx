@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/form";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import AuthFormContainer from "./AuthFormContainer";
 import { Input } from "@/components/ui/input";
-import SubmitButton from "@/components/SubmitButton";
 import { signupSchema, signupType } from "../schemas/signup-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupAction } from "../actions/signup-action";
+import { AuthRes } from "../types/res-auth-types";
+
+import AuthFormContainer from "./AuthFormContainer";
+import SubmitButton from "@/components/SubmitButton";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import ShowPasswordCheckbox from "./ShowPasswordCheckbox";
 import FormSuccessMessage from "@/components/FormSuccessMessage";
@@ -42,11 +44,11 @@ const SignupForm = () => {
     },
   } = form;
 
-  const onSubmit = async (data: signupType) => {
+  const onSubmit = async (data: signupType): Promise<void> => {
     setSuccess(undefined);
 
     try {
-      const res = await signupAction(data);
+      const res: AuthRes = await signupAction(data);
 
       if (res.error) {
         return form.setError("root", {
@@ -88,7 +90,7 @@ const SignupForm = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -101,7 +103,7 @@ const SignupForm = () => {
               <FormItem>
                 <FormLabel>Nom d&apos;utilisateur</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -114,7 +116,11 @@ const SignupForm = () => {
               <FormItem>
                 <FormLabel>Mot de passe</FormLabel>
                 <FormControl>
-                  <Input {...field} type={showPassword ? "text" : "password"} />
+                  <Input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    disabled={isSubmitting}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -127,7 +133,11 @@ const SignupForm = () => {
               <FormItem>
                 <FormLabel>Confirmer le mot de passe</FormLabel>
                 <FormControl>
-                  <Input {...field} type={showPassword ? "text" : "password"} />
+                  <Input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    disabled={isSubmitting}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

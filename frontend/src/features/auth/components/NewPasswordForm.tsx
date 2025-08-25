@@ -22,14 +22,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ShowPasswordCheckbox from "./ShowPasswordCheckbox";
-import FormSuccessMessage from "@/components/FormSuccessMessage";
-import FormErrorMessage from "@/components/FormErrorMessage";
-import SubmitButton from "@/components/SubmitButton";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { newPasswordAction } from "../actions/new-password-action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { AuthRes } from "../types/res-auth-types";
+
+import ShowPasswordCheckbox from "./ShowPasswordCheckbox";
+import FormSuccessMessage from "@/components/FormSuccessMessage";
+import FormErrorMessage from "@/components/FormErrorMessage";
+import SubmitButton from "@/components/SubmitButton";
 
 type NewPasswordFormProps = {
   token: string;
@@ -57,11 +59,11 @@ const NewPasswordForm = ({ token }: NewPasswordFormProps) => {
     },
   } = form;
 
-  const onSubmit = async (data: newPasswordType) => {
+  const onSubmit = async (data: newPasswordType): Promise<void> => {
     setSuccess(undefined);
 
     try {
-      const res = await newPasswordAction(data);
+      const res: AuthRes = await newPasswordAction(data);
 
       if (res.error) {
         return form.setError("root", {
@@ -102,6 +104,7 @@ const NewPasswordForm = ({ token }: NewPasswordFormProps) => {
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
@@ -118,6 +121,7 @@ const NewPasswordForm = ({ token }: NewPasswordFormProps) => {
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />

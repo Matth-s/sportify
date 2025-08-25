@@ -13,9 +13,6 @@ import { emailSchema, emailType } from "../schemas/email-schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import FormSuccessMessage from "@/components/FormSuccessMessage";
-import FormErrorMessage from "@/components/FormErrorMessage";
-import SubmitButton from "@/components/SubmitButton";
 import {
   Card,
   CardContent,
@@ -25,8 +22,14 @@ import {
 } from "@/components/ui/card";
 import { sendRestPassword } from "../actions/send-reset-password";
 
+import FormSuccessMessage from "@/components/FormSuccessMessage";
+import FormErrorMessage from "@/components/FormErrorMessage";
+import SubmitButton from "@/components/SubmitButton";
+import BackAuthButton from "./BackAuthButton";
+
 const ForgotPasswordForm = () => {
   const [success, setSuccess] = useState<string | undefined>(undefined);
+
   const form = useForm<emailType>({
     defaultValues: {
       email: "",
@@ -66,7 +69,8 @@ const ForgotPasswordForm = () => {
   return (
     <Card className="w-lg">
       <CardHeader>
-        <CardTitle>Réinitialisé le mot de passe</CardTitle>
+        <BackAuthButton />
+        <CardTitle>Réinitialiser le mot de passe</CardTitle>
         <CardDescription>
           Entrez votre email pour recevoir une demande de réinitialisation
         </CardDescription>
@@ -84,7 +88,7 @@ const ForgotPasswordForm = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

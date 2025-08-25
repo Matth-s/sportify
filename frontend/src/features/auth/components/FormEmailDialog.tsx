@@ -23,12 +23,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { sendNewVerificationEmailAction } from "../actions/send-new-confirm-email-action";
+import { AuthRes } from "../types/res-auth-types";
+
 import FormSuccessMessage from "@/components/FormSuccessMessage";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import SubmitButton from "@/components/SubmitButton";
-import { sendNewVerificationEmailAction } from "../actions/send-new-confirm-email-action";
 
-type FormEmailDialogProps = {
+type FormEmailProps = {
   type: "email-verification" | "reset-password";
   textButton: string;
   title: string;
@@ -36,13 +38,13 @@ type FormEmailDialogProps = {
   submitButtonText: string;
 };
 
-const FormEmailDialog = ({
+const FormEmail = ({
   type,
   submitButtonText,
   textButton,
   title,
   description,
-}: FormEmailDialogProps) => {
+}: FormEmailProps) => {
   const [success, setSuccess] = useState<string | undefined>(undefined);
 
   const form = useForm<emailType>({
@@ -59,11 +61,11 @@ const FormEmailDialog = ({
     },
   } = form;
 
-  const onSubmit = async (data: emailType) => {
+  const onSubmit = async (data: emailType): Promise<void> => {
     setSuccess(undefined);
 
     try {
-      const res = await sendNewVerificationEmailAction(data);
+      const res: AuthRes = await sendNewVerificationEmailAction(data);
 
       if (res?.error) {
         return form.setError("root", {
@@ -71,7 +73,9 @@ const FormEmailDialog = ({
         });
       }
 
-      setSuccess("Un email vous a été envoyé");
+      if (res.success) {
+        setSuccess("Un email vous a été envoyé");
+      }
     } catch {
       form.setError("root", {
         message: "Une erreur est survenue",
@@ -101,7 +105,7 @@ const FormEmailDialog = ({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,4 +126,4 @@ const FormEmailDialog = ({
   );
 };
 
-export default FormEmailDialog;
+export default FormEmail;

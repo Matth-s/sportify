@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import { loginSchema, loginType } from "../schemas/login-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import AuthFormContainer from "./AuthFormContainer";
-import AuthFormLink from "./AuthFormLink";
 import {
   Form,
   FormControl,
@@ -15,11 +13,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { loginAction } from "../actions/login-action";
+import { useRouter } from "next/navigation";
+import { AuthRes } from "../types/res-auth-types";
+
 import ShowPasswordCheckbox from "./ShowPasswordCheckbox";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import SubmitButton from "@/components/SubmitButton";
-import { loginAction } from "../actions/login-action";
-import { useRouter } from "next/navigation";
+import AuthFormContainer from "./AuthFormContainer";
+import AuthFormLink from "./AuthFormLink";
 import Link from "next/link";
 
 const LoginForm = () => {
@@ -44,7 +46,7 @@ const LoginForm = () => {
 
   const onSubmit = async (data: loginType) => {
     try {
-      const res = await loginAction(data);
+      const res: AuthRes = await loginAction(data);
 
       if (res.error) {
         return form.setError("root", {
@@ -86,7 +88,7 @@ const LoginForm = () => {
               <FormItem>
                 <FormLabel>Email ou nom d&apos;utilisateur</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,7 +111,11 @@ const LoginForm = () => {
                 </div>
 
                 <FormControl>
-                  <Input {...field} type={showPassword ? "text" : "password"} />
+                  <Input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    disabled={isSubmitting}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
