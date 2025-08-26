@@ -15,6 +15,7 @@ import { signupSchema, signupType } from "../schemas/signup-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupAction } from "../actions/signup-action";
 import { AuthRes } from "../types/res-auth-types";
+import { Separator } from "@/components/ui/separator";
 
 import AuthFormContainer from "./AuthFormContainer";
 import SubmitButton from "@/components/SubmitButton";
@@ -22,6 +23,7 @@ import FormErrorMessage from "@/components/FormErrorMessage";
 import ShowPasswordCheckbox from "./ShowPasswordCheckbox";
 import FormSuccessMessage from "@/components/FormSuccessMessage";
 import AuthFormLink from "./AuthFormLink";
+import StravaAuthButton from "./StravaAuthButton";
 
 const SignupForm = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -156,6 +158,10 @@ const SignupForm = () => {
           <SubmitButton isDisabled={isSubmitting} textButton="S'inscrire" />
         </form>
       </Form>
+
+      <Separator className="my-4" />
+
+      <StravaAuthButton isDisabled={isSubmitting} />
     </AuthFormContainer>
   );
 };

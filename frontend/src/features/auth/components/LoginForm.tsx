@@ -16,7 +16,9 @@ import { Input } from "@/components/ui/input";
 import { loginAction } from "../actions/login-action";
 import { useRouter } from "next/navigation";
 import { AuthRes } from "../types/res-auth-types";
+import { Separator } from "@/components/ui/separator";
 
+import StravaAuthButton from "./StravaAuthButton";
 import ShowPasswordCheckbox from "./ShowPasswordCheckbox";
 import FormErrorMessage from "@/components/FormErrorMessage";
 import SubmitButton from "@/components/SubmitButton";
@@ -133,6 +135,10 @@ const LoginForm = () => {
           <SubmitButton isDisabled={isSubmitting} textButton="S'inscrire" />
         </form>
       </Form>
+
+      <Separator className="my-4" />
+
+      <StravaAuthButton isDisabled={isSubmitting} />
     </AuthFormContainer>
   );
 };
