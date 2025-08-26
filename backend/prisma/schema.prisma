@@ -14,7 +14,7 @@ model User {
   name            String
   username        String
   displayUsername String
-  email           String
+  email           String?   @unique
   emailVerified   Boolean
   image           String?
   description     String?
@@ -29,7 +29,6 @@ model User {
   sessions Session[]
   accounts Account[]
 
-  @@unique([email])
   @@map("user")
 }
 

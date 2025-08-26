@@ -2,16 +2,25 @@ import { APIError, betterAuth } from 'better-auth';
 import { username } from 'better-auth/plugins';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { comparePassword, hashPassword } from './bcrypt';
+import { genericOAuth } from 'better-auth/plugins';
 import prisma from './prisma';
 import {
   sendEmailVerification,
   sendPasswordResetEmail,
 } from './mail';
-import { FRONTEND_URL } from './env-config';
-import { IUser } from '../types/user-types';
+import {
+  FRONTEND_URL,
+  STRAVA_CLIENT_ID,
+  STRAVA_CLIENT_SECRET,
+} from './env-config';
+import { IAthleteData, IUser } from '../types/user-types';
+import { getStravaAthlete } from '../services/fetch-strava-athelete';
 
 export const auth = betterAuth({
+  //origin allowed
   trustedOrigins: [FRONTEND_URL],
+
+  //email and password conf
   emailAndPassword: {
     autoSignIn: false,
     enabled: true,
@@ -80,6 +89,36 @@ export const auth = betterAuth({
       usernameNormalization: (username) => username.trim(),
       displayUsernameNormalization: (displayUsername) =>
         displayUsername.toLowerCase(),
+    }),
+
+    genericOAuth({
+      config: [
+        {
+          providerId: 'strava',
+          clientId: STRAVA_CLIENT_ID,
+          clientSecret: STRAVA_CLIENT_SECRET,
+          authorizationUrl: 'https://www.strava.com/oauth/authorize',
+          tokenUrl: 'https://www.strava.com/oauth/token',
+          scopes: ['read'],
+          getUserInfo: async (tokenResponse) => {
+            const { id, lastname, firstname } =
+              await getStravaAthlete(tokenResponse.accessToken ?? '');
+
+            const name = firstname + ' ' + lastname;
+
+            return {
+              id: String(id),
+              email: String(id),
+              name,
+              username: name,
+              displayUsername: name,
+              emailVerified: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+          },
+        },
+      ],
     }),
   ],
 
