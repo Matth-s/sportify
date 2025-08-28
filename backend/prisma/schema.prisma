@@ -24,10 +24,10 @@ model User {
   createdAt       DateTime
   updatedAt       DateTime
 
-  //joinRequest JoinRequest[]
-  //groupJoined Member[]
-  sessions Session[]
-  accounts Account[]
+  joinRequest JoinRequest[]
+  groupJoined Member[]
+  sessions    Session[]
+  accounts    Account[]
 
   @@map("user")
 }
@@ -77,47 +77,55 @@ model Verification {
   @@map("verification")
 }
 
-/**
- * model Group {
- * id             String   @id @default(cuid())
- * name           String
- * normalizedName String   @unique
- * location       String?
- * code           String?
- * image          String?
- * createdAt      DateTime @default(now())
- * joinMode       JoinMode @default(PUBLIC)
- * joinRequest    JoinRequest[]
- * sportPracticed Sport[]
- * members        Member[]
- * }
- * model JoinRequest {
- * id      String @id @default(cuid())
- * groupId String
- * userId  String
- * group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
- * user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
- * }
- * model Member {
- * id      String     @id @default(cuid())
- * userId  String
- * groupId String
- * role    MemberRole @default(MEMBER)
- * group   Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
- * user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
- * @@unique([groupId, userId])
- * }
- * enum MemberRole {
- * ADMIN
- * MEMBER
- * MODERATOR
- * }
- * enum JoinMode {
- * PRIVATE
- * PUBLIC
- * INVITATION
- * }
- */
+model Group {
+  id             String   @id @default(cuid())
+  name           String
+  normalizedName String   @unique
+  location       String?
+  code           String?
+  image          String?
+  createdAt      DateTime @default(now())
+  joinMode       JoinMode @default(PUBLIC)
+
+  joinRequest    JoinRequest[]
+  sportPracticed Sport[]
+  members        Member[]
+}
+
+model Member {
+  id      String     @id @default(cuid())
+  userId  String
+  groupId String
+  role    MemberRole @default(MEMBER)
+  group   Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+}
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+  MODERATOR
+  BANNED
+}
+
+enum JoinMode {
+  PRIVATE
+  PUBLIC
+  INVITATION
+}
+
+model JoinRequest {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+}
 
 enum Sport {
   ROAD_CYCLING
