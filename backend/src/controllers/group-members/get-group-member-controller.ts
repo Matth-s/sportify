@@ -6,6 +6,9 @@ export const getGroupMemberController = async (
   req: Request,
   res: Response
 ) => {
+  // ici l utilisateur fait partie du groupe (middleware)
+
+  // validation des parametres
   const { params } = req;
 
   const validatedParams = groupIdSchema.safeParse({

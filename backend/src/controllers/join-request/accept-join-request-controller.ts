@@ -2,13 +2,20 @@ import { Response, Request } from 'express';
 import { groupIdJoinRequestIdSchema } from '../../schemas/join-group-request/create-join-request-schema';
 import { getJoinRequestByGroupIdRequestId } from '../../data/group-join-request-data';
 import { inUserInGroup } from '../../data/group-member-data';
-import prisma from '../../lib/prisma';
+import {
+  emitDeleteJoinRequest,
+  emitNewGroupMember,
+} from '../../helpers/socket-emit';
+import { deleteJoinRequestById } from '../../services/join-request-service';
+import { createGroupMember } from '../../services/group-member-service';
 
 export const acceptJoinRequestController = async (
   req: Request,
   res: Response
 ) => {
-  // ici l utlisateur est admin ou moderateur
+  // ici l utlisateur est admin ou moderateur (middleware)
+
+  //verifier les parametres
   const {
     params: {
       groupId: groupIdParams,
@@ -43,7 +50,7 @@ export const acceptJoinRequestController = async (
 
   const {
     userId,
-    user: { username },
+    user: { username, image },
   } = existingJoinRequest;
 
   //verifier si l utlisateur est déjà dans le groupe
@@ -53,17 +60,13 @@ export const acceptJoinRequestController = async (
   });
 
   if (isUserAlreadyMember) {
-    // envoyer un evenement socket
-    req.app.get('io').to(`group-${groupId}`).emit('delete-request', {
+    // supprimer la demande dans le socket
+    emitDeleteJoinRequest(req, groupId, {
       id: existingJoinRequest.id,
     });
 
     //supprimer la donnée
-    await prisma.joinRequest.delete({
-      where: {
-        id: existingJoinRequest.id,
-      },
-    });
+    await deleteJoinRequestById(existingJoinRequest.id);
 
     return res.status(200).json({
       message: 'Cet utilisateur fait déjà parti de votre groupe',
@@ -71,29 +74,27 @@ export const acceptJoinRequestController = async (
   }
 
   try {
-    await prisma.member.create({
-      data: {
-        role: 'MEMBER',
-        userId: existingJoinRequest.userId,
-        groupId: existingJoinRequest.groupId,
-      },
+    // stocker le nouveau membre dans la bdd
+    const memberSaved = await createGroupMember({
+      userId: existingJoinRequest.userId,
+      groupId: existingJoinRequest.groupId,
     });
 
-    await prisma.joinRequest.delete({
-      where: {
-        id: existingJoinRequest.id,
-      },
-    });
+    //supprimer la requete de demande d adhesion
+    await deleteJoinRequestById(existingJoinRequest.id);
 
-    // mettre a jour le socket des demandes d adhesion²
-
-    req.app.get('io').to(`group${groupId}`).emit('delete-request', {
+    // supprimer la demande dans le socket
+    emitDeleteJoinRequest(req, groupId, {
       id: existingJoinRequest.id,
     });
 
     //mettre a jour le socket des membres
-    req.app.get('io').to(`group-${groupId}`).emit('new-member', {
-      user: 'énouveaumem',
+    emitNewGroupMember(req, groupId, {
+      ...memberSaved,
+      user: {
+        username,
+        image,
+      },
     });
 
     return res.status(201).json({

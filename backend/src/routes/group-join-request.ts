@@ -7,6 +7,10 @@ import { requiredGroupAdminOrModerator } from '../middlewares/required-group-adm
 import { declineJoinRequestController } from '../controllers/join-request/decline-join-request-controller';
 import { acceptJoinRequestController } from '../controllers/join-request/accept-join-request-controller';
 
+/* 
+  Route des demandes d adhesion
+*/
+
 const router = Router({
   mergeParams: true,
 });
@@ -18,6 +22,7 @@ router.post(
   [requiredGroupAdminOrModerator],
   acceptJoinRequestController
 );
+
 router.post('/new-request', createJoinGroupController);
 router.delete('/delete-request', deleteJoinRequestController);
 

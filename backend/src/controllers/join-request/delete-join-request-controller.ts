@@ -2,14 +2,17 @@ import { Request, Response } from 'express';
 import { createJoinGroupRequestSchema } from '../../schemas/join-group-request/create-join-request-schema';
 import { getGroupByIdWithMemberAndJoinRequest } from '../../data/group-member-data';
 import { deleteJoinRequest } from '../../services/join-request-service';
+import { emitDeleteJoinRequest } from '../../helpers/socket-emit';
 
 export const deleteJoinRequestController = async (
   req: Request,
   res: Response
 ) => {
-  const { user, params } = req;
-
-  const groupIdParams = params.groupId;
+  //validation des paramètres
+  const {
+    user,
+    params: { groupId: groupIdParams },
+  } = req;
 
   const validatedQuery = createJoinGroupRequestSchema.safeParse({
     groupId: groupIdParams,
@@ -21,6 +24,7 @@ export const deleteJoinRequestController = async (
     });
   }
 
+  //verifier si le groupe existe toujours
   const { groupId } = validatedQuery.data;
 
   const existingGroup = await getGroupByIdWithMemberAndJoinRequest({
@@ -50,11 +54,11 @@ export const deleteJoinRequestController = async (
     });
 
     // mettre a jour le socket
-    req.app.get('io').emit(`group-${groupId}`).to('delete-request', {
+    emitDeleteJoinRequest(req, groupId, {
       id: joinRequest[0].id,
     });
 
-    return res.status(200).json({
+    return res.status(204).json({
       message: 'Votre demande à été retiré',
     });
   } catch {

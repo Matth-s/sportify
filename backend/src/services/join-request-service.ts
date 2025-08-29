@@ -22,6 +22,20 @@ export const createJoinRequest = async ({
   }
 };
 
+export const deleteJoinRequestById = async (
+  id: string
+): Promise<void> => {
+  try {
+    await prisma.joinRequest.delete({
+      where: {
+        id,
+      },
+    });
+  } catch {
+    throw new Error('Une erreur est survenue');
+  }
+};
+
 export const deleteJoinRequest = async ({
   userId,
   groupId,

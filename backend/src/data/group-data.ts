@@ -17,3 +17,21 @@ export const getGroupByNormalizedName = async (
     throw new Error('Une erreur est survenue');
   }
 };
+
+export const getGroupById = async (
+  id: string
+): Promise<Group | null> => {
+  try {
+    const existingGroup = await prisma.group.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return existingGroup;
+  } catch {
+    throw new Error(
+      'Une erreur est survenue lors de la récupération du groupe'
+    );
+  }
+};

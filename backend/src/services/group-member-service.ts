@@ -1,3 +1,4 @@
+import { Member } from '../generated/prisma';
 import prisma from '../lib/prisma';
 
 export const createGroupMember = async ({
@@ -6,7 +7,7 @@ export const createGroupMember = async ({
 }: {
   userId: string;
   groupId: string;
-}) => {
+}): Promise<Member> => {
   try {
     const memberSaved = await prisma.member.create({
       data: {

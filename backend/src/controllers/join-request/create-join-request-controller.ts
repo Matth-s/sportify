@@ -5,13 +5,19 @@ import {
   createJoinRequest,
   deleteJoinRequest,
 } from '../../services/join-request-service';
-import { createGroupMember } from '../../services/create-group-member';
+import { createGroupMember } from '../../services/group-member-service';
 import prisma from '../../lib/prisma';
+import { getUsernameAndImageById } from '../../data/user-data';
+import {
+  emitNewGroupMember,
+  emitNewJoinRequest,
+} from '../../helpers/socket-emit';
 
 export const createJoinGroupController = async (
   req: Request,
   res: Response
 ) => {
+  //verifier les paramatres
   const { user, params } = req;
 
   const groupIdParams = params.groupId;
@@ -42,18 +48,9 @@ export const createJoinGroupController = async (
 
   const { members, joinRequest, joinMode } = existingGroup;
 
-  const getUser = (await prisma.user.findUnique({
-    where: {
-      id: user.userId,
-    },
-    select: {
-      username: true,
-      image: true,
-    },
-  })) as {
-    username: string;
-    image: string | null;
-  };
+  const { username, image } = await getUsernameAndImageById(
+    user.userId
+  );
 
   //si le membre a été banni
   if (members[0]?.role === 'BANNED') {
@@ -94,15 +91,13 @@ export const createJoinGroupController = async (
       userId: user.userId,
     });
 
-    req.app
-      .get('io')
-      .to(`group-${groupId}`)
-      .emit(`group-${groupId}:new-request`, {
-        ...requestSaved,
-        user: {
-          ...getUser,
-        },
-      });
+    emitNewJoinRequest(req, groupId, {
+      ...requestSaved,
+      user: {
+        username,
+        image,
+      },
+    });
 
     return res.status(201).json({
       join: false,
@@ -112,7 +107,7 @@ export const createJoinGroupController = async (
 
   try {
     // créer le nouvel utilisateur
-    await createGroupMember({
+    const memberSaved = await createGroupMember({
       groupId,
       userId: user.userId,
     });
@@ -126,13 +121,13 @@ export const createJoinGroupController = async (
     }
 
     //mettre a jour le socket avec le nouveau membre
-
-    req.app
-      .get('io')
-      .to(`group-${groupId}`)
-      .emit(`group-${groupId}:new-member`, {
-        ok: true,
-      });
+    emitNewGroupMember(req, groupId, {
+      ...memberSaved,
+      user: {
+        username,
+        image,
+      },
+    });
 
     return res.status(201).json({
       join: true,

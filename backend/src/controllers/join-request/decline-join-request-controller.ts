@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import { groupIdJoinRequestIdSchema } from '../../schemas/join-group-request/create-join-request-schema';
 import { getJoinRequestByGroupIdRequestId } from '../../data/group-join-request-data';
-import prisma from '../../lib/prisma';
+import { emitDeleteJoinRequest } from '../../helpers/socket-emit';
+import { deleteJoinRequestById } from '../../services/join-request-service';
 
 export const declineJoinRequestController = async (
   req: Request,
   res: Response
 ) => {
-  // l initiateur de la requete esadmin ou moderateur du groupe
+  // ici l utilisateur et forcement admin ou moderateur du groupe (middleware)
 
   const {
     params: {
@@ -16,6 +17,7 @@ export const declineJoinRequestController = async (
     },
   } = req;
 
+  //verification des parametres
   const validatedParams = groupIdJoinRequestIdSchema.safeParse({
     joinRequestId: joinRequestIdParams,
     groupId: groupIdParams,
@@ -36,14 +38,8 @@ export const declineJoinRequestController = async (
 
   //verifier si la requete existe toujours
   if (!existingJoinRequest) {
-    // mettre a jour le status
-
-    req.app
-      .get('io')
-      .to(`group${groupId}`)
-      .emit(`group-${groupId}:delete-request`, {
-        id: joinRequestId,
-      });
+    // retourne un emit socket pour supprimer la demande
+    emitDeleteJoinRequest(req, groupId, { id: joinRequestId });
 
     return res.status(200).json({
       message: 'La demande à été retiré',
@@ -51,19 +47,11 @@ export const declineJoinRequestController = async (
   }
 
   try {
-    await prisma.joinRequest.delete({
-      where: {
-        id: existingJoinRequest.id,
-      },
-    });
+    //supprimer la demande d adhesion dans le bdd
+    await deleteJoinRequestById(existingJoinRequest.id);
 
-    // mettre a jour le socket des demandes d adhesion
-    req.app
-      .get('io')
-      .to(`group-${groupId}`)
-      .emit(`group-${groupId}:delete-request`, {
-        id: existingJoinRequest.id,
-      });
+    // retourne un emit socket pour supprimer la demande
+    emitDeleteJoinRequest(req, groupId, { id: joinRequestId });
 
     return res.status(204).json({
       message: 'La demande à été refusé',
