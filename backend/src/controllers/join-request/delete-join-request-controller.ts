@@ -50,6 +50,9 @@ export const deleteJoinRequestController = async (
     });
 
     // mettre a jour le socket
+    req.app.get('io').emit(`group-${groupId}`).to('delete-request', {
+      id: joinRequest[0].id,
+    });
 
     return res.status(200).json({
       message: 'Votre demande à été retiré',

@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { groupJoinMode, sportEnum } from './group-enum';
 
+export const groupIdSchema = z.object({
+  groupId: z.string(),
+});
+
 export const createGroupSchema = z.object({
   name: z.string().trim().min(1, {
     error: 'Le nom du groupe doit être renseigné',
